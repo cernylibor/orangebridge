@@ -1,6 +1,6 @@
 ---
 
-- hosts: all
+- hosts: homebridge_devices
   become: true
   tasks:
 
