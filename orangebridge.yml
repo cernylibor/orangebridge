@@ -1,0 +1,68 @@
+ - hosts: all
+   become: true
+   pre_tasks:
+
+   - name: update repository index (Debian)
+     tags: always
+     apt:
+       update_cache: yes
+     changed_when: false
+     when: ansible_distribution == "Debian"
+
+ - hosts: all
+   become: true
+   tasks:
+
+   - name: create orangepi user
+     user:
+       name: orangepi
+       groups: root
+ 
+   - name: add ssh key for orangepi user
+     authorized_key:
+       user: orangepi
+       key: "{{ lookup('file', '~/.ssh/orangepi.pub') }}"
+      
+   - name: add sudoers file for orangepi user
+     copy:
+       src: sudoer_orangepi
+       dest: /etc/sudoers.d/orangepi
+       owner: root
+       group: root
+       mode: 0440
+
+   - name: create rmdt user
+     user:
+       name: rmdt
+       groups: root
+
+   - name: add ssh key for rmdt user
+     authorized_key:
+       user: rmdt
+       key: "{{ lookup('file', '~/.ssh/rmdt.pub') }}"
+
+   - name: add sudoers file for rmdt user
+     copy:
+       src: sudoer_rmdt
+       dest: /etc/sudoers.d/rmdt
+       owner: root
+       group: root
+       mode: 0440
+
+   - name: create ansible user
+     user:
+       name: ansible
+       groups: root
+
+   - name: add ssh key for ansible user
+     authorized_key:
+       user: ansible
+       key: "{{ lookup('file', '~/.ssh/ansible.pub') }}"
+
+   - name: add sudoers file for ansible user
+     copy:
+       src: sudoer_ansible
+       dest: /etc/sudoers.d/ansible
+       owner: root
+       group: root
+       mode: 0440
