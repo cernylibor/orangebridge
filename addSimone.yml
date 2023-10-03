@@ -1,0 +1,33 @@
+ - hosts: all
+   become: true
+   pre_tasks:
+
+   - name: update repository index (Debian)
+     tags: always
+     apt:
+       update_cache: yes
+     changed_when: false
+     when: ansible_distribution == "Debian"
+
+ - hosts: all
+   become: true
+   tasks:
+
+   - name: create simone user
+     user:
+       name: simone
+       groups: root
+ 
+   - name: add ssh key for simone
+     authorized_key:
+       user: simone
+       key: "{{ lookup('file', '~/.ssh/simone.pub') }}"
+      
+   - name: add sudoers file for simone
+     copy:
+       src: sudoer_simone
+       dest: /etc/sudoers.d/simone
+       owner: root
+       group: root
+       mode: 0440
+
