@@ -2,12 +2,104 @@
    become: true
    pre_tasks:
 
-   - name: update repository index (Debian)
+   - name: Ensure 'ntp' package is removed
+     apt:
+       name: ntp
+       state: absent
+
+   - name: Ensure systemd-timesyncd is installed
+     package:
+       name: systemd-timesyncd
+       state: present
+
+   - name: Make sure "systemd-timesyncd" is enabled
+     systemd:
+       name: systemd-timesyncd
+       state: started
+       enabled: true
+
+   - name: Turning "set-ntp" on
+     command: /usr/bin/timedatectl set-ntp on
+
+   - name: Set timezone to Europe/Prague
+     community.general.timezone:
+       name: Europe/Prague
+
+   - name: install updates (Debian)
      tags: always
      apt:
+       upgrade: dist
        update_cache: yes
-     changed_when: false
      when: ansible_distribution == "Debian"
+
+   - name: install the acl package (enables users to become unprivileged users)
+     tags: always
+     apt:
+       name:
+         - "acl"
+       state: latest
+       update_cache: yes
+     when: ansible_distribution == "Debian"
+
+   - name: sync time on the target machine
+     ansible.builtin.command: 'date -s "{{ ansible_date_time.iso8601 }}"'
+     register: datesetto
+
+   - debug:
+       var: datesetto.stdout_lines
+
+   - name: install the uncomplicated firewall ufw package
+     tags: always
+     apt:
+       name:
+         - "ufw"
+       state: latest
+     when: ansible_distribution == "Debian"
+
+   - name: Set ufw to deny everything but keep it disabled
+     community.general.ufw:
+       state: disabled
+       policy: deny
+
+   - name: Allow SSH access
+     community.general.ufw:
+       rule: allow
+       name: OpenSSH
+
+   - name: Deny in access to tcp port 80
+     community.general.ufw:
+       rule: deny
+       direction: in
+       port: '80'
+
+   - name: Allow in access to tcp port 8581
+     community.general.ufw:
+       rule: allow
+       direction: in
+       port: '8581'
+       proto: tcp
+
+   - name: Allow in access to port 1880
+     community.general.ufw:
+       rule: allow
+       direction: in
+       port: '1880'
+
+   - name: Enable UFW
+     community.general.ufw:
+       state: enabled
+
+#To				Action		From
+#--				------		----
+#[ 1] OpenSSH			ALLOW IN	Anywhere
+#[ 2] 8581/tcp			ALLOW IN	Anywhere
+#[ 3] 1880			ALLOW IN	Anywhere
+#[ 4] 80			DENY IN		Anywhere
+#[ 5] OpenSSH (v6)		ALLOW IN	Anywhere (v6)
+#[ 6] 8581/tcp (v6)		ALLOW IN	Anywhere (v6)
+#[ 7] 1880 (v6)			ALLOW IN	Anywhere (v6)
+#[ 8] 80 (v6)			DENY IN		Anywhere (v6)
+
 
  - hosts: all
    become: true
@@ -17,12 +109,12 @@
      user:
        name: orangepi
        groups: root
- 
+
    - name: add ssh key for orangepi user
      authorized_key:
        user: orangepi
        key: "{{ lookup('file', '~/.ssh/orangepi.pub') }}"
-      
+
    - name: add sudoers file for orangepi user
      copy:
        src: sudoer_orangepi

@@ -1,0 +1,74 @@
+---
+
+- hosts: VM_homebridge_devices
+  become: true
+  tasks:
+
+    - name: Install pip and pexpect
+      ansible.builtin.apt:
+        pkg:
+        - python3-pip
+        - python3-pexpect
+
+
+
+#    - name: Install pexpect python package
+#      ansible.builtin.pip:
+#        name: pexpect
+
+
+- hosts: VM_homebridge_devices
+  become: false
+  tasks:
+
+    - name: Download node-red installer script
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/node-red/linux-installers/master/deb/update-nodejs-and-nodered
+        dest: /tmp/update-nodejs-and-nodered.sh
+
+    - name: Changing perm of the node-red installer (update-nodejs-and-nodered.sh), adding "+x"
+      ansible.builtin.file:
+        dest: /tmp/update-nodejs-and-nodered.sh
+        mode: a+x
+    
+#    - name: Execute the update-nodejs-and-nodered.sh script to install node-red
+#      ansible.builtin.expect:
+#        command: bash /tmp/update-nodejs-and-nodered.sh
+#        responses:
+#          Are you really sure you want to do this \? \[y\/N\] \?: "y"
+#          Would you like to install the Pi-specific nodes \? \[y\/N\] \?: "y"
+#          Would you like to customise the settings now \(y\/N\) \?: "N"
+#        timeout: 180
+
+    - name: Execute the update-nodejs-and-nodered.sh script to install node-red
+      ansible.builtin.command: /tmp/update-nodejs-and-nodered.sh --confirm-install --confirm-pi --no-init --restart
+
+    - name: Remove the update-nodejs-and-nodered.sh script
+      file:
+        path: /tmp/update-nodejs-and-nodered.sh
+        state: absent
+
+#    - name: Install Node-Red using the official Node-Red installation script from Git
+#      ansible.builtin.command: bash <(curl -sL https://raw.githubusercontent.com/node-red/linux-installers/master/deb/update-nodejs-and-nodered)
+#      register: myoutput
+
+    - name: install the build-essential package
+      tags: always
+      ansible.builtin.apt:
+        name:
+          - "build-essential"
+        state: latest
+      when: ansible_distribution == "Debian"
+
+    - name: add node-red to systemd for start at boot
+      # sudo systemctl enable nodered.service
+      ansible.builtin.systemd:
+        state: started
+        enabled: true
+        name: nodered
+      become: true
+
+    - name: reboot the machine
+      tags: always
+      ansible.builtin.reboot:
+      become: true

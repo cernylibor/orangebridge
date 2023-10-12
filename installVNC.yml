@@ -1,0 +1,46 @@
+---
+
+- hosts: VM_homebridge_devices
+  become: true
+  tasks:
+
+  - name: update repository cache, then install xfce4 and vnc
+    package:
+      name:
+        - "xfce4"
+        - "xfce4-goodies"
+        - "tightvncserver"
+        - "dbus-x11"
+        - "xfonts-base"
+      state: latest
+      update_cache: yes
+    when: ansible_distribution == "Debian"
+
+# Create and configure the vnc user
+  - name: Create .vnc directory for VNC user
+    ansible.builtin.file:
+      path: /home/rmdt/.vnc
+      state: directory
+      mode: 0755
+      owner: rmdt
+
+  - name: Set VNC password for VNC user
+    ansible.builtin.shell: |
+      set -o pipefail
+      echo 87654321 | vncpasswd -f > /home/rmdt/.vnc/passwd
+    args:
+      executable: /bin/bash
+      creates: /home/rmdt/.vnc/passwd
+
+  - name: Set correct permissions for VNC passwd file
+    ansible.builtin.file:
+      path: /home/rmdt//.vnc/passwd
+      owner: rmdt
+      group: rmdt
+      mode: 0600
+
+  - name: Run the VNC server as the Remote Desktop (rmdt) user
+    ansible.builtin.command: vncserver
+    become_user: rmdt
+    register: vncrunoutput
+

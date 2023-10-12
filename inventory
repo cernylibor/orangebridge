@@ -1,2 +1,4 @@
 [homebridge_devices]
-orangepi@192.168.1.172 apache_package=apache2 php_package=libapache2-mod-php
+orangepi@192.168.1.172 apache_package=apache2 php_package=libapache2-mod-php ansible_python_interpreter=/usr/bin/python3
+[VM_homebridge_devices]
+ansible@192.168.64.5 apache_package=apache2 php_package=libapache2-mod-php ansible_python_interpreter=/usr/bin/python3

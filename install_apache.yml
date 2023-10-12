@@ -1,6 +1,6 @@
 ---
 
-- hosts: homebridge_devices
+- hosts: VM_homebridge_devices
   become: true
   tasks:
 

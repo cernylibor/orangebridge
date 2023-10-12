@@ -1,0 +1,1 @@
+deb [signed-by=/usr/share/keyrings/homebridge.asc] https://repo.homebridge.io stable main
