@@ -1,0 +1,53 @@
+- name: create orangepi user
+  ansible.builtin.user:
+    name: orangepi
+    groups: root
+
+- name: add ssh key for orangepi user
+  ansible.posix.authorized_key:
+    user: orangepi
+    key: "{{ lookup('file', '~/.ssh/orangepi.pub') }}"
+
+- name: add sudoers file for orangepi user
+  ansible.builtin.copy:
+    src: sudoer_orangepi
+    dest: /etc/sudoers.d/orangepi
+    owner: root
+    group: root
+    mode: 0440
+
+- name: create rmdt user
+  ansible.builtin.user:
+    name: rmdt
+    groups: root
+
+- name: add ssh key for rmdt user
+  ansible.posix.authorized_key:
+    user: rmdt
+    key: "{{ lookup('file', '~/.ssh/rmdt.pub') }}"
+
+- name: add sudoers file for rmdt user
+  ansible.builtin.copy:
+    src: sudoer_rmdt
+    dest: /etc/sudoers.d/rmdt
+    owner: root
+    group: root
+    mode: 0440
+
+- name: create ansible user
+  ansible.builtin.user:
+    name: ansible
+    groups: root
+
+- name: add ssh key for ansible user
+  ansible.posix.authorized_key:
+    user: ansible
+    key: "{{ lookup('file', '~/.ssh/ansible.pub') }}"
+
+- name: add sudoers file for ansible user
+  ansible.builtin.copy:
+    src: sudoer_ansible
+    dest: /etc/sudoers.d/ansible
+    owner: root
+    group: root
+    mode: 0440

@@ -1,11 +1,30 @@
-- name: Lay the foundation - bootstrap (update/upgrade/create users/copy ssh keys)
-  import_playbook: bootstrap.yml
 
-- name: Install VNC
-  import_playbook: installVNC.yml
+ - name: Run pre-tasks
+   import_playbook: pre_tasks.yml
 
-- name: Install Homebridge
-  import_playbook: installhomebridge.yml
+ - hosts: all
+   become: true
+   remote_user: root
+   roles:
+     - common
 
-- name: Install node-red
-  import_playbook: installnode-red.yml
+ - hosts: VM_homebridge_devices
+   remote_user: ansible
+   vars:
+     var_vnc_user: rmdt
+   become: true
+   roles:
+     - vncserver
+
+ - hosts: VM_homebridge_devices
+   become: true
+   roles:
+     - homebridgeserver
+
+ - hosts: VM_homebridge_devices
+   become: false
+   roles:
+     - noderedserver
+
+ - name: Run post-tasks
+   import_playbook: post_tasks.yml

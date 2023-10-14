@@ -1,0 +1,11 @@
+- name: Lay the foundation - bootstrap (update/upgrade/create users/copy ssh keys)
+  import_playbook: bootstrap.yml
+
+- name: Install VNC
+  import_playbook: installVNC.yml
+
+- name: Install Homebridge
+  import_playbook: installhomebridge.yml
+
+- name: Install node-red
+  import_playbook: installnode-red.yml

@@ -1,0 +1,23 @@
+  - name: One way to avoid apt_key once it is removed from your distro, armored keys should use .asc extension, binary should use .gpg
+    block:
+      - name: somerepo | no apt key
+        ansible.builtin.get_url:
+          url: https://repo.homebridge.io/KEY.gpg
+          dest: /usr/share/keyrings/homebridge.asc
+          # checksum:
+
+      - name: Add the Homebridge Repository to the system sources
+        ansible.builtin.copy:
+          src: homebridge.list
+          dest: /etc/apt/sources.list.d/homebridge.list
+          owner: root
+          group: root
+          mode: 664
+
+      - name: update apt cache and install homebridge
+        tags: always
+        ansible.builtin.apt:
+          name:
+            - "homebridge"
+          state: latest
+          update_cache: yes

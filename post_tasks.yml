@@ -1,0 +1,10 @@
+ - hosts: all
+   remote_user: root
+   become: true
+   post_tasks:
+
+    - name: reboot the machine
+      tags: always
+      ansible.builtin.reboot:
+      become: true
+

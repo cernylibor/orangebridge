@@ -1,16 +1,10 @@
----
-
-- hosts: VM_homebridge_devices
-  become: false
-  tasks:
-
     - name: Install pip and pexpect
       become: true
       ansible.builtin.apt:
         pkg:
         - python3-pip
         - python3-pexpect
-
+        cache_valid_time: 3600
 
 
 #    - name: Install pexpect python package
@@ -31,7 +25,7 @@
       ansible.builtin.file:
         dest: /tmp/update-nodejs-and-nodered.sh
         mode: a+x
-    
+
 #    - name: Execute the update-nodejs-and-nodered.sh script to install node-red
 #      ansible.builtin.expect:
 #        command: bash /tmp/update-nodejs-and-nodered.sh
@@ -45,7 +39,7 @@
       ansible.builtin.command: /tmp/update-nodejs-and-nodered.sh --confirm-install --confirm-pi --no-init --restart
 
     - name: Remove the update-nodejs-and-nodered.sh script
-      file:
+      ansible.builtin.file:
         path: /tmp/update-nodejs-and-nodered.sh
         state: absent
 
@@ -59,7 +53,8 @@
         name:
           - "build-essential"
         state: latest
-      when: ansible_distribution == "Debian"
+        cache_valid_time: 3600
+      become: true
 
     - name: add node-red to systemd for start at boot
       # sudo systemctl enable nodered.service
@@ -69,7 +64,7 @@
         name: nodered
       become: true
 
-    - name: reboot the machine
-      tags: always
-      ansible.builtin.reboot:
-      become: true
+#    - name: reboot the machine
+#      tags: always
+#      ansible.builtin.reboot:
+#      become: true
