@@ -1,0 +1,24 @@
+---
+
+- hosts: VM_homebridge_devices
+  remote_user: root
+  vars:
+    var_vnc_user: rmdt
+  become: true
+  tasks:
+
+
+  - name: copy the templated vncserver.service file to the hosr
+    copy:
+      src: vncserver@.service
+      dest: /etc/systemd/system/vncserver@.service
+      owner: root
+      group: root
+      mode: 644
+
+  - name: place the vnc username into the vncserver.service file
+    ansible.builtin.replace:
+      path: /etc/systemd/system/vncserver@.service
+      regexp: '\<username\>'
+      replace: '{{ var_vnc_user }}'
+

@@ -1,6 +1,9 @@
 ---
 
 - hosts: VM_homebridge_devices
+  remote_user: ansible
+  vars:
+    var_vnc_user: rmdt
   become: true
   tasks:
 
@@ -19,28 +22,58 @@
 # Create and configure the vnc user
   - name: Create .vnc directory for VNC user
     ansible.builtin.file:
-      path: /home/rmdt/.vnc
+      path: /home/{{ var_vnc_user }}/.vnc
       state: directory
       mode: 0755
-      owner: rmdt
+      owner: "{{ var_vnc_user }}"
 
   - name: Set VNC password for VNC user
     ansible.builtin.shell: |
       set -o pipefail
-      echo 87654321 | vncpasswd -f > /home/rmdt/.vnc/passwd
+      echo 87654321 | vncpasswd -f > /home/{{ var_vnc_user }}/.vnc/passwd
     args:
       executable: /bin/bash
-      creates: /home/rmdt/.vnc/passwd
+      creates: /home/{{ var_vnc_user }}/.vnc/passwd
 
   - name: Set correct permissions for VNC passwd file
     ansible.builtin.file:
-      path: /home/rmdt//.vnc/passwd
-      owner: rmdt
-      group: rmdt
+      path: /home/{{ var_vnc_user }}/.vnc/passwd
+      owner: "{{ var_vnc_user }}"
+      group: "{{ var_vnc_user }}"
       mode: 0600
 
-  - name: Run the VNC server as the Remote Desktop (rmdt) user
-    ansible.builtin.command: vncserver
-    become_user: rmdt
-    register: vncrunoutput
+#  - name: Run the VNC server as the Remote Desktop (rmdt) user
+#    ansible.builtin.command: vncserver
+#    become_user: rmdt
+#    register: vncrunoutput
+
+  - name: copy the templated vncserver@.service file to the host
+    ansible.builtin.copy:
+      src: vncserver@.service
+      dest: /etc/systemd/system/vncserver@.service
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: copy the xstartup file to the host, add executable flag to it,  and make a backup of any pre-existing file
+    ansible.builtin.copy:
+      src: xstartup
+      dest: /home/{{ var_vnc_user }}/.vnc/xstartup
+      backup: yes
+      owner: "{{ var_vnc_user }}"
+      group: "{{ var_vnc_user }}"
+      mode: a+x
+
+  - name: place the vnc username into the vncserver.service file
+    ansible.builtin.replace:
+      path: /etc/systemd/system/vncserver@.service
+      regexp: '\<username\>'
+      replace: '{{ var_vnc_user }}'
+
+  - name: add vncserver@1 to systemd for start at boot
+    ansible.builtin.systemd:
+      enabled: true
+      state: started
+      name: vncserver@1
+    become: true
 
