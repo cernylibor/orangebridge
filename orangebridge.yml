@@ -1,14 +1,17 @@
 
  - name: Run pre-tasks
+   tags: pretasks
    import_playbook: pre_tasks.yml
 
- - hosts: all
+ - hosts: VM_homebridgeservers
+   tags: common
    become: true
    remote_user: root
    roles:
      - common
 
- - hosts: VM_homebridge_devices
+ - hosts: VM_homebridgeservers
+   tags: vncserver
    remote_user: ansible
    vars:
      var_vnc_user: rmdt
@@ -16,15 +19,18 @@
    roles:
      - vncserver
 
- - hosts: VM_homebridge_devices
+ - hosts: VM_homebridgeservers
+   tags: homebridgeserver
    become: true
    roles:
      - homebridgeserver
 
- - hosts: VM_homebridge_devices
+ - hosts: VM_homebridgeservers
+   tags: noderedserver
    become: false
    roles:
      - noderedserver
 
  - name: Run post-tasks
+   tags: posttasks
    import_playbook: post_tasks.yml

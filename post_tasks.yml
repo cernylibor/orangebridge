@@ -1,4 +1,4 @@
- - hosts: all
+ - hosts: VM_homebridgeservers
    remote_user: root
    become: true
    post_tasks:
