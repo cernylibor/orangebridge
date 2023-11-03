@@ -2,19 +2,21 @@
   hosts: 127.0.0.1
   connection: local
 
-  vars:
-    users_to_create:
-      - user_name: orangepi
-        passphrase: super_secret_password
-        has_sudo: yes
-      - user_name: rmdt
-        passphrase: super_secret_password
-        has_sudo: no
-      - user_name: ansible
-        passphrase:
-        has_sudo: yes
+#  vars:
+#    users_to_create:
+#      - user_name: orangepi
+#        passphrase: super_secret_password
+#        has_sudo: yes
+#      - user_name: rmdt
+#        passphrase: super_secret_password
+#        has_sudo: no
+#      - user_name: ansible
+#        passphrase:
+#        has_sudo: yes
 
   tasks:
+    - name: include variables from orangebridge_config.yml
+      ansible.builtin.include_vars: orangebridge_config.yml
 
     - name: Userlist filtered to those whith sudo
       debug:

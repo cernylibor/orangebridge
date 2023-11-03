@@ -1,3 +1,6 @@
+   - name: include variables from orangebridge_config.yml
+     ansible.builtin.include_vars: orangebridge_config.yml
+
    - name: Ensure 'ntp' package is removed
      ansible.builtin.apt:
        name: ntp
@@ -18,9 +21,9 @@
    - name: Turning "set-ntp" on
      ansible.builtin.command: /usr/bin/timedatectl set-ntp on
 
-   - name: Set timezone to Europe/Prague
+   - name: Set timezone to {{ timezone_to_use }}
      community.general.timezone:
-       name: Europe/Prague
+       name: "{{ timezone_to_use }}"
 
    - name: upgrade distro and apt cache
      tags: always

@@ -1,3 +1,6 @@
+# the below list of users is used by both generateSSHKeys.yml and orangebridge.yml
+# if running orangebridge.yml (the foundation role) fails complaining about missing certificates,
+# you can use generateSSHKeys.yml to create them
 users_to_create:
   - user_name: orangepi
     passphrase: super_secret_password
@@ -8,3 +11,10 @@ users_to_create:
   - user_name: ansible
     passphrase:
     has_sudo: yes
+  - user_name: franta
+    passphrase: jajsemFranta
+    has_sudo: yes
+
+
+# pick your timezone from "timedatectl list-timezones" 
+timezone_to_use: Europe/Prague
