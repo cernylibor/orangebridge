@@ -1,3 +1,37 @@
+- name: include variables from orangebridge_config.yml
+  ansible.builtin.include_vars: orangebridge_config.yml
+
+- name: create user accounts with sudo access
+  ansible.builtin.user:
+    name: "{{ item.user_name }}"
+    groups: root
+  loop: "{{ users_to_create|json_query('[?\"has_sudo\"]') }}"
+
+- name: create user accounts with NO sudo access
+  ansible.builtin.user:
+    name: "{{ item.user_name }}"
+    groups: users
+  loop: "{{ users_to_create|json_query('[?!\"has_sudo\"]') }}"
+
+- name: add the templated sudoers files for users with sudo access
+  ansible.builtin.template:
+    src: sudoer_file.j2
+    dest: /etc/sudoers.d/{{item.user_name}}
+    owner: root
+    group: root
+    mode: 0440
+  loop: "{{ users_to_create|json_query('[?\"has_sudo\"]') }}"
+
+- name: add ssh key for all users
+  ansible.posix.authorized_key:
+    user: "{{ item.user_name }}"
+    key: "{{ lookup('file', '~/.ssh/{{item.user_name}}.pub') }}"
+  #loop: "{{ users_to_create|json_query('[?\"has_sudo\"]') }}"
+  loop: "{{ users_to_create }}"
+
+- meta: end_play
+
+
 - name: create orangepi user
   ansible.builtin.user:
     name: orangepi

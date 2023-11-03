@@ -1,4 +1,4 @@
- - hosts: VM_homebridgeservers
+ - hosts: orangebridgedevices
    remote_user: root
    become: true
    post_tasks:

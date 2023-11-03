@@ -33,12 +33,27 @@
       mode: 0600
 
   - name: copy the templated vncserver@.service file to the host
-    ansible.builtin.copy:
-      src: vncserver@.service
+    ansible.builtin.template:
+      src: templates/vncserver@.service.j2
       dest: /etc/systemd/system/vncserver@.service
       owner: root
       group: root
       mode: 0644
+
+
+#  - name: copy the templated vncserver@.service file to the host
+#    ansible.builtin.copy:
+#      src: vncserver@.service
+#      dest: /etc/systemd/system/vncserver@.service
+#      owner: root
+#      group: root
+#      mode: 0644
+
+#  - name: place the vnc username into the vncserver.service file
+#    ansible.builtin.replace:
+#      path: /etc/systemd/system/vncserver@.service
+#      regexp: '\<username\>'
+#      replace: '{{ var_vnc_user }}'
 
   - name: copy the xstartup file to the host, add executable flag to it,  and make a backup of any pre-existing file
     ansible.builtin.copy:
@@ -48,12 +63,6 @@
       owner: "{{ var_vnc_user }}"
       group: "{{ var_vnc_user }}"
       mode: a+x
-
-  - name: place the vnc username into the vncserver.service file
-    ansible.builtin.replace:
-      path: /etc/systemd/system/vncserver@.service
-      regexp: '\<username\>'
-      replace: '{{ var_vnc_user }}'
 
   - name: add vncserver@1 to systemd for start at boot
     ansible.builtin.systemd:

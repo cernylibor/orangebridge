@@ -3,11 +3,25 @@
   connection: local
 
   vars:
-    default_account_ssh_key_filename: orangepi
-    vnc_account_ssh_key_filename: rmdt
-    service_account_ssh_key_filename: ansible
+    users_to_create:
+      - user_name: orangepi
+        passphrase: super_secret_password
+        has_sudo: yes
+      - user_name: rmdt
+        passphrase: super_secret_password
+        has_sudo: no
+      - user_name: ansible
+        passphrase:
+        has_sudo: yes
 
   tasks:
+
+    - name: Userlist filtered to those whith sudo
+      debug:
+        var: item.user_name
+      loop: "{{ users_to_create|json_query('[?\"has_sudo\"]') }}"
+
+#    - meta: end_play
 
     - name: install the python and pip packages (Debian)
       apt:
@@ -23,26 +37,11 @@
         state: latest
       when: ansible_distribution == "Debian"
 
-
-    - name: generate SSH key "{{default_account_ssh_key_filename}}"
+    - name: Generate SSH keys for use with Ansible
       community.crypto.openssh_keypair:
-        path: "~/.ssh/{{default_account_ssh_key_filename}}"
-        passphrase: super_secret_password
+        path: "~/.ssh/{{ item.user_name }}"
+        passphrase: "{{ item.passphrase }}"
         type: ed25519
         state: present
         force: no
-
-    - name: generate SSH key "{{vnc_account_ssh_key_filename}}"
-      community.crypto.openssh_keypair:
-        path: "~/.ssh/{{vnc_account_ssh_key_filename}}"
-        passphrase: super_secret_password
-        type: ed25519
-        state: present
-        force: no
-
-    - name: generate SSH key "{{service_account_ssh_key_filename}}"
-      community.crypto.openssh_keypair:
-        path: "~/.ssh/{{service_account_ssh_key_filename}}"
-        type: ed25519
-        state: present
-        force: no
+      loop: "{{ users_to_create }}"

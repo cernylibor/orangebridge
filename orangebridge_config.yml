@@ -1,0 +1,10 @@
+users_to_create:
+  - user_name: orangepi
+    passphrase: super_secret_password
+    has_sudo: yes
+  - user_name: rmdt
+    passphrase: super_secret_password
+    has_sudo: no
+  - user_name: ansible
+    passphrase:
+    has_sudo: yes

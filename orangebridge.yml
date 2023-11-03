@@ -1,16 +1,30 @@
-
- - name: Run pre-tasks
-   tags: pretasks
-   import_playbook: pre_tasks.yml
-
- - hosts: VM_homebridgeservers
-   tags: common
+ - hosts: addusers
+   tags: addusers
    become: true
    remote_user: root
+#   vars:
+#     users_to_create:
+#       - user_name: orangepi
+#         passphrase: super_secret_password
+#         has_sudo: yes
+#       - user_name: rmdt
+#         passphrase: super_secret_password
+#         has_sudo: no
+#       - user_name: ansible
+#         passphrase:
+#         has_sudo: yes
    roles:
-     - common
+     - addusers
 
- - hosts: VM_homebridgeservers
+ - hosts: orangebridgedevices
+   tags: foundation
+   become_user: root
+   become: true
+   roles:
+     - foundation
+
+
+ - hosts: vncservers
    tags: vncserver
    remote_user: ansible
    vars:
@@ -19,13 +33,13 @@
    roles:
      - vncserver
 
- - hosts: VM_homebridgeservers
+ - hosts: homebridgeservers
    tags: homebridgeserver
    become: true
    roles:
      - homebridgeserver
 
- - hosts: VM_homebridgeservers
+ - hosts: noderedservers
    tags: noderedserver
    become: false
    roles:

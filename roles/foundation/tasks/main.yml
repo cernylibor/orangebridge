@@ -1,8 +1,3 @@
- - hosts: orangebridgedevices
-   remote_user: root
-   become: true
-   pre_tasks:
-
    - name: Ensure 'ntp' package is removed
      ansible.builtin.apt:
        name: ntp
